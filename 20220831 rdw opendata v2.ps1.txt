@@ -1,0 +1,18 @@
+# 20220831 rdw OPENDATA
+
+# get RDW official datasets as csv (comma delimited)
+$url1 = "https://opendata.rdw.nl/browse?limit=1500&limitTo=datasets&provenance=official"
+$w1 = Invoke-Webrequest $url1
+$p1 = $w1.links.href |?{($_ -like "*/opendata.rdw*") -and ($_ -notlike "*socrata*") }
+#$p1.count #67
+
+$downloaddir = "l:\rdw\"
+$p1 | % {
+	$url = $_
+	$downloadid=$url.Split('/')[-1]
+	$downloadfilename = -join("$downloaddir",$url.Split('/')[-1]," ",$url.Split('/')[-2],".csv")
+	$downloadurl = -join("https://opendata.rdw.nl/api/views/",$url.Split('/')[-1],"/rows.csv?accessType=DOWNLOAD")
+	Invoke-Webrequest -uri $downloadurl -OutFile $downloadfilename
+	$msg = -join("DONE: ",$url)
+	Write-Host $msg
+}
